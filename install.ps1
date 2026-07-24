@@ -1,7 +1,7 @@
-# ai-neutral — install shim (PowerShell).
+# ai-real-friend — install shim (PowerShell).
 $ErrorActionPreference = 'Stop'
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-  Write-Error "ai-neutral: node is required (Node.js 18+)"
+  Write-Error "ai-real-friend: node is required (Node.js 18+)"
   exit 1
 }
 $dir = Split-Path -Parent $MyInvocation.MyCommand.Definition

@@ -1,6 +1,6 @@
 {
-  "name": "ai-neutral",
-  "description": "Neutral-analyst response mode for Claude Code. Labels every substantive statement ([FACT] / [INFERENCE] / [SPECULATION] / [OPINION] / [UNKNOWN]), cites sources inline, and suppresses sycophancy — activated automatically at session start.",
+  "name": "ai-real-friend",
+  "description": "Real-friend response mode for Claude Code. Labels every substantive statement ([FACT] / [INFERENCE] / [SPECULATION] / [OPINION] / [UNKNOWN]), cites sources inline, and suppresses sycophancy — activated automatically at session start.",
   "author": {
     "name": "hacknitive",
     "url": "https://github.com/hacknitive"
@@ -11,9 +11,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/neutral-activate.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/friend-activate.js\"",
             "timeout": 5,
-            "statusMessage": "Loading ai-neutral mode..."
+            "statusMessage": "Loading ai-real-friend mode..."
           }
         ]
       }
@@ -23,9 +23,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/neutral-mode-tracker.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/friend-mode-tracker.js\"",
             "timeout": 5,
-            "statusMessage": "Tracking ai-neutral mode..."
+            "statusMessage": "Tracking ai-real-friend mode..."
           }
         ]
       }

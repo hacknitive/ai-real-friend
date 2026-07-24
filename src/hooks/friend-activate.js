@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// ai-neutral — Claude Code SessionStart hook.
+// ai-real-friend — Claude Code SessionStart hook.
 //
 // Runs on every session start:
 //   1. Resolves default state (env / repo config / user config / 'on').
-//   2. Writes flag file at $CLAUDE_CONFIG_DIR/.neutral-active (statusline reads this).
+//   2. Writes flag file at $CLAUDE_CONFIG_DIR/.friend-active (statusline reads this).
 //   3. When state is 'on', emits the full SKILL.md ruleset as SessionStart context.
 //      SessionStart hook stdout is injected as hidden system context.
 //   4. When state is 'off', deletes the flag and exits without injecting rules.
@@ -11,10 +11,10 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { getDefaultState, safeWriteFlag } = require('./neutral-config');
+const { getDefaultState, safeWriteFlag } = require('./friend-config');
 
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-const flagPath = path.join(claudeDir, '.neutral-active');
+const flagPath = path.join(claudeDir, '.friend-active');
 const settingsPath = path.join(claudeDir, 'settings.json');
 
 const state = getDefaultState();
@@ -28,16 +28,16 @@ if (state === 'off') {
 safeWriteFlag(flagPath, 'on');
 
 // Read SKILL.md — single source of truth. Try known locations in order:
-//   1. $CLAUDE_PLUGIN_ROOT/skills/ai-neutral/SKILL.md (Claude Code plugin runtime).
-//   2. ../../skills/ai-neutral/SKILL.md (repo checkout / plugin layout).
-//   3. ../skills/ai-neutral/SKILL.md (standalone install with hooks + skills siblings).
+//   1. $CLAUDE_PLUGIN_ROOT/skills/ai-real-friend/SKILL.md (Claude Code plugin runtime).
+//   2. ../../skills/ai-real-friend/SKILL.md (repo checkout / plugin layout).
+//   3. ../skills/ai-real-friend/SKILL.md (standalone install with hooks + skills siblings).
 const skillCandidates = [];
 if (process.env.CLAUDE_PLUGIN_ROOT) {
-  skillCandidates.push(path.join(process.env.CLAUDE_PLUGIN_ROOT, 'skills', 'ai-neutral', 'SKILL.md'));
+  skillCandidates.push(path.join(process.env.CLAUDE_PLUGIN_ROOT, 'skills', 'ai-real-friend', 'SKILL.md'));
 }
 skillCandidates.push(
-  path.join(__dirname, '..', '..', 'skills', 'ai-neutral', 'SKILL.md'),
-  path.join(__dirname, '..', 'skills', 'ai-neutral', 'SKILL.md')
+  path.join(__dirname, '..', '..', 'skills', 'ai-real-friend', 'SKILL.md'),
+  path.join(__dirname, '..', 'skills', 'ai-real-friend', 'SKILL.md')
 );
 
 let skillContent = '';
@@ -48,11 +48,11 @@ for (const p of skillCandidates) {
 let output;
 if (skillContent) {
   const body = skillContent.replace(/^---[\s\S]*?---\s*/, '');
-  output = 'AI-NEUTRAL MODE ACTIVE\n\n' + body;
+  output = 'AI-REAL-FRIEND MODE ACTIVE\n\n' + body;
 } else {
   // Minimum viable ruleset when SKILL.md is not on disk.
   output =
-    'AI-NEUTRAL MODE ACTIVE\n\n' +
+    'AI-REAL-FRIEND MODE ACTIVE\n\n' +
     'Output is information, not communication. Persist for the whole conversation.\n\n' +
     '## Rules\n\n' +
     '1. Label every substantive statement: [FACT], [INFERENCE], [SPECULATION], [OPINION] (only when requested), [UNKNOWN].\n' +
@@ -65,7 +65,7 @@ if (skillContent) {
     '## Prohibited lexicon\n\n' +
     'Sentiment (great, terrible, unfortunately), hedging (I think, arguably, perhaps), softeners (just, simply, obviously), pleasantries (sure, happy to, apologies), moral framing (should, ought, good, bad) except when quoting or when normative answer requested.\n\n' +
     '## Off\n\n' +
-    'Deactivate on: "neutral off", "stop neutral", "disable neutral", "/neutral off". "normal mode" does NOT deactivate — reserved for other modes.\n\n' +
+    'Deactivate on: "friend off", "stop friend", "disable friend", "/friend off". "normal mode" does NOT deactivate — reserved for other modes.\n\n' +
     '## Safety\n\n' +
     'Does not override safety refusals.';
 }
@@ -79,12 +79,12 @@ try {
   }
   if (!hasStatusline) {
     const isWindows = process.platform === 'win32';
-    const scriptName = isWindows ? 'neutral-statusline.ps1' : 'neutral-statusline.sh';
+    const scriptName = isWindows ? 'friend-statusline.ps1' : 'friend-statusline.sh';
     const scriptPath = path.join(__dirname, scriptName);
     const command = isWindows
       ? `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`
       : `bash "${scriptPath}"`;
-    output += '\n\nSTATUSLINE SETUP NEEDED: ai-neutral ships a statusline badge showing [NEUTRAL] when active. Not configured yet. To enable, add to ' + path.join(claudeDir, 'settings.json') + ': "statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }. Proactively offer to set this up on first interaction.';
+    output += '\n\nSTATUSLINE SETUP NEEDED: ai-real-friend ships a statusline badge showing [FRIEND] when active. Not configured yet. To enable, add to ' + path.join(claudeDir, 'settings.json') + ': "statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }. Proactively offer to set this up on first interaction.';
   }
 } catch (e) { /* silent */ }
 

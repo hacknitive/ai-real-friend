@@ -1,11 +1,11 @@
 #!/bin/bash
-# ai-neutral — statusline badge for Claude Code.
-# Reads the neutral-active flag and prints a colored [NEUTRAL] badge.
+# ai-real-friend — statusline badge for Claude Code.
+# Reads the friend-active flag and prints a colored [FRIEND] badge.
 #
 # Usage in settings.json:
-#   "statusLine": { "type": "command", "command": "bash /path/to/neutral-statusline.sh" }
+#   "statusLine": { "type": "command", "command": "bash /path/to/friend-statusline.sh" }
 
-FLAG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.neutral-active"
+FLAG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.friend-active"
 
 # Refuse symlinks — a local attacker could point the flag at ~/.ssh/id_rsa and
 # have the statusline render its bytes to the terminal every keystroke.
@@ -17,6 +17,6 @@ STATE=$(head -c 8 "$FLAG" 2>/dev/null | tr -d '\n\r' | tr '[:upper:]' '[:lower:]
 STATE=$(printf '%s' "$STATE" | tr -cd 'a-z')
 
 case "$STATE" in
-  on) printf '\033[38;5;33m[NEUTRAL]\033[0m' ;;
+  on) printf '\033[38;5;33m[FRIEND]\033[0m' ;;
   *) exit 0 ;;
 esac

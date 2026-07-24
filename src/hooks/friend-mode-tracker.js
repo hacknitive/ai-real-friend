@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ai-neutral — UserPromptSubmit hook.
+// ai-real-friend — UserPromptSubmit hook.
 //
 // Responsibilities each turn:
 //   1. Parse the user prompt for activation/deactivation triggers
@@ -12,10 +12,10 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { getDefaultState, safeWriteFlag, readFlag } = require('./neutral-config');
+const { getDefaultState, safeWriteFlag, readFlag } = require('./friend-config');
 
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
-const flagPath = path.join(claudeDir, '.neutral-active');
+const flagPath = path.join(claudeDir, '.friend-active');
 
 let input = '';
 process.stdin.on('data', chunk => { input += chunk; });
@@ -26,40 +26,41 @@ process.stdin.on('end', () => {
     const data = JSON.parse(input);
     const prompt = (data.prompt || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
-    // Deactivation intent — computed FIRST so "turn neutral off" never falls
+    // Deactivation intent — computed FIRST so "turn friend off" never falls
     // through to activation. `normal mode` intentionally excluded: it belongs
-    // to other modes (e.g., caveman) and must not deactivate ai-neutral.
+    // to other modes (e.g., caveman) and must not deactivate ai-real-friend.
     const wantsOff =
-      /\b(stop|disable|deactivate|quit|exit|kill|end)\s+(the\s+)?(ai[-\s]?)?neutral(\s+(mode|analyst))?\b/.test(prompt) ||
-      /\b(ai[-\s]?)?neutral(\s+(mode|analyst))?\s+(off|stop|disabled?)\b/.test(prompt) ||
-      /\bturn\s+off\s+(the\s+)?(ai[-\s]?)?neutral\b/.test(prompt) ||
+      /\b(stop|disable|deactivate|quit|exit|kill|end)\s+(the\s+)?(ai[-\s]?)?(real[-\s]?)?friend(\s+(mode|analyst))?\b/.test(prompt) ||
+      /\b(ai[-\s]?)?(real[-\s]?)?friend(\s+(mode|analyst))?\s+(off|stop|disabled?)\b/.test(prompt) ||
+      /\bturn\s+off\s+(the\s+)?(ai[-\s]?)?(real[-\s]?)?friend\b/.test(prompt) ||
       /\bstop\s+analyst(\s+mode)?\b/.test(prompt);
 
-    // Questions about neutral mode are not activation commands.
+    // Questions about friend mode are not activation commands.
     const isQuestion =
       /^(what|whats|what's|how|why|when|where|who|does|do|did|is|are|can|could|would|should|tell me|explain)\b/.test(prompt);
 
     // Natural-language activation. Kept conservative so ordinary uses of the
-    // word "neutral" (e.g. "neutral color", "network neutrality") do not flip
-    // the mode. Requires either an explicit verb, "neutral mode/analyst",
-    // a bare `neutral on`, or a "no bias / no emotion / just facts" request.
+    // word "friend" (e.g. "my friend", "friend request", "friendly") do not
+    // flip the mode. Requires either an explicit verb + "real friend",
+    // "friend mode/analyst", a bare `friend on`, or a "no bias / no emotion /
+    // just facts" request.
     if (!wantsOff && !isQuestion) {
-      if (/\b(activate|enable|start|turn on|use|switch to|want|give me|go)\b[^.]{0,40}\b(ai[-\s]?)?neutral\b/.test(prompt) ||
+      if (/\b(activate|enable|start|turn on|use|switch to|want|give me|go)\b[^.]{0,40}\b(ai[-\s]?)?real[-\s]?friend\b/.test(prompt) ||
           /\banalyst\s+mode\s+(on|please|now|active)\b/.test(prompt) ||
-          /\b(ai[-\s]?)?neutral(\s+(mode|analyst))?\s+(on|please|now|active)\b/.test(prompt) ||
-          /^(ai[-\s]?)?neutral\s*[.!]*$/.test(prompt) ||
-          /\b(no\s+bias|no\s+emotion|just\s+facts|answer\s+neutrally|source[-\s]labeled)\b/.test(prompt)) {
+          /\b(ai[-\s]?)?(real[-\s]?)?friend(\s+(mode|analyst))?\s+(on|please|now|active)\b/.test(prompt) ||
+          /^(ai[-\s]?)?real[-\s]?friend\s*[.!]*$/.test(prompt) ||
+          /\b(no\s+bias|no\s+emotion|just\s+facts|be\s+honest|source[-\s]labeled)\b/.test(prompt)) {
         const s = getDefaultState();
         if (s === 'on') safeWriteFlag(flagPath, 'on');
       }
     }
 
     // Slash commands. Accept both bare and marketplace-namespaced forms.
-    // /ai-neutral, /neutral                    → on (or the configured default)
-    // /ai-neutral off, /neutral off            → off
-    // /ai-neutral on,  /neutral on             → on
-    if (prompt.startsWith('/ai-neutral') || prompt.startsWith('/neutral') ||
-        prompt.startsWith('/ai-neutral:ai-neutral')) {
+    // /ai-real-friend, /friend                    → on (or the configured default)
+    // /ai-real-friend off, /friend off            → off
+    // /ai-real-friend on,  /friend on             → on
+    if (prompt.startsWith('/ai-real-friend') || prompt.startsWith('/friend') ||
+        prompt.startsWith('/ai-real-friend:ai-real-friend')) {
       const parts = prompt.split(/\s+/);
       const arg = (parts[1] || '').toLowerCase();
       if (arg === 'off' || arg === 'stop' || arg === 'disable') {
@@ -84,12 +85,12 @@ process.stdin.on('end', () => {
       process.stdout.write(JSON.stringify({
         hookSpecificOutput: {
           hookEventName: 'UserPromptSubmit',
-          additionalContext: 'AI-NEUTRAL MODE ACTIVE. ' +
+          additionalContext: 'AI-REAL-FRIEND MODE ACTIVE. ' +
             'Label every substantive statement: [FACT] / [INFERENCE] / [SPECULATION] / [OPINION, requested] / [UNKNOWN]. ' +
             'Cite sources inline; no fabricated citations. ' +
             'No sentiment/hedging/softeners/pleasantries/moral framing. ' +
             'Contested questions: enumerate positions, do not pick a winner unless asked. ' +
-            'Off phrase: "neutral off" / "stop neutral". "normal mode" is NOT an off switch here.'
+            'Off phrase: "friend off" / "stop friend". "normal mode" is NOT an off switch here.'
         }
       }));
     }

@@ -1,8 +1,8 @@
-# ai-neutral — statusline badge for Claude Code (PowerShell).
-# Prints [NEUTRAL] when the flag file exists and reads "on".
+# ai-real-friend — statusline badge for Claude Code (PowerShell).
+# Prints [FRIEND] when the flag file exists and reads "on".
 
 $flagDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME '.claude' }
-$flagPath = Join-Path $flagDir '.neutral-active'
+$flagPath = Join-Path $flagDir '.friend-active'
 
 if (-not (Test-Path -LiteralPath $flagPath -PathType Leaf)) { exit 0 }
 
@@ -19,5 +19,5 @@ if ($state.Length -gt 8) { exit 0 }
 
 if ($state -eq 'on') {
   $esc = [char]27
-  Write-Host -NoNewline "$esc[38;5;33m[NEUTRAL]$esc[0m"
+  Write-Host -NoNewline "$esc[38;5;33m[FRIEND]$esc[0m"
 }

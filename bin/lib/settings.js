@@ -1,4 +1,4 @@
-// ai-neutral — JSONC-tolerant settings.json reader/writer + hook merge helpers.
+// ai-real-friend — JSONC-tolerant settings.json reader/writer + hook merge helpers.
 //
 // Claude Code accepts `//` and `/* */` comments in settings.json. `JSON.parse`
 // does not. If we crash on a commented settings.json the installer looks
@@ -46,7 +46,7 @@ function readSettings(settingsPath) {
   try {
     return JSON.parse(stripJsonComments(raw));
   } catch (e) {
-    throw new Error(`ai-neutral: cannot parse ${settingsPath}: ${e.message}`);
+    throw new Error(`ai-real-friend: cannot parse ${settingsPath}: ${e.message}`);
   }
 }
 
@@ -60,7 +60,7 @@ function writeSettings(settingsPath, obj) {
 // Every merged hook entry embeds this substring in its command so the
 // uninstaller can strip our entries without touching entries other plugins
 // have added.
-const MARKER = 'ai-neutral';
+const MARKER = 'ai-real-friend';
 
 function stripOurHooks(settings) {
   if (!settings.hooks || typeof settings.hooks !== 'object') return settings;

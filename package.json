@@ -1,15 +1,15 @@
 {
-  "name": "ai-neutral",
+  "name": "ai-real-friend",
   "version": "0.1.0",
-  "description": "Neutral-analyst response mode for Claude Code. Labels every substantive statement, cites sources inline, suppresses sycophancy.",
+  "description": "Real-friend response mode for Claude Code. Labels every substantive statement, cites sources inline, suppresses sycophancy.",
   "license": "MIT",
   "author": "hacknitive",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hacknitive/ai-neutral"
+    "url": "https://github.com/hacknitive/ai-real-friend"
   },
   "bin": {
-    "ai-neutral-install": "bin/install.js"
+    "ai-real-friend-install": "bin/install.js"
   },
   "scripts": {
     "install-hooks": "node bin/install.js",

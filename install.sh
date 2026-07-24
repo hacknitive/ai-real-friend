@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# ai-neutral — install shim.
+# ai-real-friend — install shim.
 # Delegates to bin/install.js.
 
 set -e
 
 if ! command -v node >/dev/null 2>&1; then
-  echo "ai-neutral: node is required (Node.js 18+)"
+  echo "ai-real-friend: node is required (Node.js 18+)"
   exit 1
 fi
 

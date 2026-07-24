@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// ai-neutral — standalone Claude Code installer.
+// ai-real-friend — standalone Claude Code installer.
 //
 // Two install modes:
 //   1. Plugin install (recommended): Claude Code's plugin loader reads
@@ -90,15 +90,15 @@ function install(target, args) {
   const repoRoot = path.resolve(__dirname, '..');
   const hooksSrc = path.join(repoRoot, 'src', 'hooks');
   const skillsSrc = path.join(repoRoot, 'skills');
-  const hooksDst = path.join(target, 'hooks', 'ai-neutral');
+  const hooksDst = path.join(target, 'hooks', 'ai-real-friend');
   const skillsDst = path.join(target, 'skills');
   const settingsPath = path.join(target, 'settings.json');
 
   log(`[${target}] installing (dry-run=${args.dryRun})`);
   log(`  copy hooks:  ${hooksSrc} -> ${hooksDst}`);
   copyTree(hooksSrc, hooksDst, args.dryRun);
-  log(`  copy skill:  ${path.join(skillsSrc, 'ai-neutral')} -> ${path.join(skillsDst, 'ai-neutral')}`);
-  copyTree(path.join(skillsSrc, 'ai-neutral'), path.join(skillsDst, 'ai-neutral'), args.dryRun);
+  log(`  copy skill:  ${path.join(skillsSrc, 'ai-real-friend')} -> ${path.join(skillsDst, 'ai-real-friend')}`);
+  copyTree(path.join(skillsSrc, 'ai-real-friend'), path.join(skillsDst, 'ai-real-friend'), args.dryRun);
 
   let settings;
   try { settings = readSettings(settingsPath); }
@@ -109,12 +109,12 @@ function install(target, args) {
   const nodeCmd = 'node';
   const sessionHook = {
     type: 'command',
-    command: `${nodeCmd} "${path.join(hooksDst, 'neutral-activate.js')}"`,
+    command: `${nodeCmd} "${path.join(hooksDst, 'friend-activate.js')}"`,
     timeout: 5,
   };
   const promptHook = {
     type: 'command',
-    command: `${nodeCmd} "${path.join(hooksDst, 'neutral-mode-tracker.js')}"`,
+    command: `${nodeCmd} "${path.join(hooksDst, 'friend-mode-tracker.js')}"`,
     timeout: 5,
   };
   ensureHook(settings, 'SessionStart', sessionHook);
@@ -122,7 +122,7 @@ function install(target, args) {
 
   if (args.statusline && !settings.statusLine) {
     const isWindows = process.platform === 'win32';
-    const scriptName = isWindows ? 'neutral-statusline.ps1' : 'neutral-statusline.sh';
+    const scriptName = isWindows ? 'friend-statusline.ps1' : 'friend-statusline.sh';
     const scriptPath = path.join(hooksDst, scriptName);
     settings.statusLine = {
       type: 'command',
@@ -138,8 +138,8 @@ function install(target, args) {
 }
 
 function uninstall(target, args) {
-  const hooksDst = path.join(target, 'hooks', 'ai-neutral');
-  const skillsDst = path.join(target, 'skills', 'ai-neutral');
+  const hooksDst = path.join(target, 'hooks', 'ai-real-friend');
+  const skillsDst = path.join(target, 'skills', 'ai-real-friend');
   const settingsPath = path.join(target, 'settings.json');
 
   log(`[${target}] uninstalling (dry-run=${args.dryRun})`);

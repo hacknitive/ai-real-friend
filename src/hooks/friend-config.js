@@ -1,15 +1,15 @@
 #!/usr/bin/env node
-// ai-neutral — shared configuration + safe flag file IO.
+// ai-real-friend — shared configuration + safe flag file IO.
 //
 // Resolution order for default state:
-//   1. NEUTRAL_DEFAULT environment variable
+//   1. FRIEND_DEFAULT environment variable
 //   2. Repo-local config walked up from cwd:
-//      - <dir>/.neutral/config.json
-//      - <dir>/.neutral.json
+//      - <dir>/.friend/config.json
+//      - <dir>/.friend.json
 //   3. User config file:
-//      - $XDG_CONFIG_HOME/ai-neutral/config.json
-//      - ~/.config/ai-neutral/config.json  (macOS / Linux fallback)
-//      - %APPDATA%\ai-neutral\config.json  (Windows fallback)
+//      - $XDG_CONFIG_HOME/ai-real-friend/config.json
+//      - ~/.config/ai-real-friend/config.json  (macOS / Linux fallback)
+//      - %APPDATA%\ai-real-friend\config.json  (Windows fallback)
 //   4. 'on'
 //
 // Config file shape: { "default": "on" | "off" }
@@ -22,27 +22,27 @@ const VALID_STATES = ['on', 'off'];
 
 function getUserConfigDir() {
   if (process.env.XDG_CONFIG_HOME) {
-    return path.join(process.env.XDG_CONFIG_HOME, 'ai-neutral');
+    return path.join(process.env.XDG_CONFIG_HOME, 'ai-real-friend');
   }
   if (process.platform === 'win32') {
     return path.join(
       process.env.APPDATA || path.join(os.homedir(), 'AppData', 'Roaming'),
-      'ai-neutral'
+      'ai-real-friend'
     );
   }
-  return path.join(os.homedir(), '.config', 'ai-neutral');
+  return path.join(os.homedir(), '.config', 'ai-real-friend');
 }
 
 function getUserConfigPath() {
   return path.join(getUserConfigDir(), 'config.json');
 }
 
-// Walk up from `start` looking for repo-local ai-neutral config.
+// Walk up from `start` looking for repo-local ai-real-friend config.
 // Bounded at 64 ancestors. Refuses symlinks.
 function findRepoConfigPath(start) {
   try {
     let dir = path.resolve(start || process.cwd());
-    const candidates = ['.neutral/config.json', '.neutral.json'];
+    const candidates = ['.friend/config.json', '.friend.json'];
     for (let i = 0; i < 64; i++) {
       for (const rel of candidates) {
         const p = path.join(dir, rel);
@@ -72,7 +72,7 @@ function readStateFromConfigFile(configPath) {
 }
 
 function getDefaultState() {
-  const envState = process.env.NEUTRAL_DEFAULT;
+  const envState = process.env.FRIEND_DEFAULT;
   if (envState && VALID_STATES.includes(envState.toLowerCase())) {
     return envState.toLowerCase();
   }
@@ -91,7 +91,7 @@ function getDefaultState() {
 // When the parent dir is a symlink, resolves and verifies ownership so
 // legitimate patterns like `ln -s /opt/shared-claude ~/.claude` still work.
 function safeWriteFlag(flagPath, content) {
-  const debug = process.env.NEUTRAL_DEBUG === '1';
+  const debug = process.env.FRIEND_DEBUG === '1';
   try {
     const flagDir = path.dirname(flagPath);
     fs.mkdirSync(flagDir, { recursive: true });
@@ -105,7 +105,7 @@ function safeWriteFlag(flagPath, content) {
         if (!realStat.isDirectory()) return;
         if (typeof process.getuid === 'function') {
           if (realStat.uid !== process.getuid()) {
-            if (debug) process.stderr.write(`[ai-neutral] refusing symlink to uid ${realStat.uid}\n`);
+            if (debug) process.stderr.write(`[ai-real-friend] refusing symlink to uid ${realStat.uid}\n`);
             return;
           }
         } else {
@@ -126,7 +126,7 @@ function safeWriteFlag(flagPath, content) {
       if (e.code !== 'ENOENT') return;
     }
 
-    const tempPath = path.join(realFlagDir, `.neutral-active.${process.pid}.${Date.now()}`);
+    const tempPath = path.join(realFlagDir, `.friend-active.${process.pid}.${Date.now()}`);
     const O_NOFOLLOW = typeof fs.constants.O_NOFOLLOW === 'number' ? fs.constants.O_NOFOLLOW : 0;
     const flags = fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | O_NOFOLLOW;
     let fd;
