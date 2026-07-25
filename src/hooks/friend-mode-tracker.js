@@ -47,6 +47,7 @@ process.stdin.on('end', () => {
     if (!wantsOff && !isQuestion) {
       if (/\b(activate|enable|start|turn on|use|switch to|want|give me|go)\b[^.]{0,40}\b(ai[-\s]?)?real[-\s]?friend\b/.test(prompt) ||
           /\banalyst\s+mode\s+(on|please|now|active)\b/.test(prompt) ||
+          /^\s*analyst\s+mode\s*[.!]*$/.test(prompt) ||
           /\b(ai[-\s]?)?(real[-\s]?)?friend(\s+(mode|analyst))?\s+(on|please|now|active)\b/.test(prompt) ||
           /^(ai[-\s]?)?real[-\s]?friend\s*[.!]*$/.test(prompt) ||
           /\b(no\s+bias|no\s+emotion|just\s+facts|be\s+honest|source[-\s]labeled)\b/.test(prompt)) {

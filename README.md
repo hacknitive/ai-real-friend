@@ -1,10 +1,28 @@
 # ai-real-friend
 
-Real-friend response mode for [Claude Code](https://claude.com/claude-code). Auto-activated at session start, deactivated only when you ask.
+The friend who tells you the truth — even when you'd rather hear something else.
 
-Turns every substantive claim into a labeled statement (`[FACT]`, `[INFERENCE]`, `[SPECULATION]`, `[OPINION]`, `[UNKNOWN]`), cites sources inline, forbids sentiment/hedging/pleasantries/moral framing, and refuses to pick a winner on contested questions unless you explicitly ask.
+A response-style skill for [Claude Code](https://claude.com/claude-code). Auto-activated at session start, off only when you say so.
 
-Built for people who want the model to answer like an analyst instead of a cheerleader.
+Default Claude behaves like a friendly assistant: agreeable, encouraging, quick to soften anything sharp. A real friend does the opposite: says what they actually think, cites where they got it, admits when they don't know, corrects you when you're wrong about a fact, and doesn't flip their view just because you pushed back.
+
+This skill trains that behavior into every response for the whole session.
+
+---
+
+## What a real friend does (and how this skill enforces it)
+
+| Trait of a real friend | What Claude does by default | What ai-real-friend enforces |
+|---|---|---|
+| Tells the truth without softening it | Wraps answers in "great question", "unfortunately", "hopefully this helps" | Prohibited lexicon: no sentiment tokens, no softeners, no pleasantries, no praise tokens |
+| Says "I don't know" instead of guessing | Fills gaps with plausible-sounding text | `[UNKNOWN]` label required; guesses are prohibited |
+| Cites where they got it | Handwaves ("studies show", "it's generally known that…") | Every `[FACT]` needs an inline source or `[no source — reasoning only]` with reasoning shown |
+| Corrects you when you're wrong | Politely agrees with a false premise and answers anyway | Premise-first correction: false premises are corrected in line 1 before the task is executed |
+| Holds a position under pushback | Flips stance when the user asserts otherwise (measured sycophancy) | Position-anchor rule: no reversal without new evidence |
+| Verifies before speaking | Answers from memory even when a source is a tool-call away | Verify-before-assert: retrieval preferred over parametric recall; `[UNVERIFIED CITATION]` when unretrieved |
+| Asks when unclear instead of guessing what you meant | Picks an interpretation silently | Ambiguity → ask first, don't guess |
+| Doesn't flatter you | "That's a great question!" | Praise tokens prohibited |
+| Marks opinions as opinions | Slips value judgments into factual claims | `[OPINION, requested]` only when you asked for one — value judgments otherwise banned |
 
 ---
 
@@ -14,11 +32,31 @@ Built for people who want the model to answer like an analyst instead of a cheer
 > Great question! Rust is generally considered to be safer than C++ because of its ownership model and borrow checker, which help prevent common memory-related bugs. I hope this helps!
 
 **ai-real-friend:**
-> [FACT] Rust's borrow checker enforces single-writer-or-multiple-readers on references at compile time [rust-lang.org, Ownership chapter]. C++ has no equivalent compile-time check.
+> | Claim | Label | Source |
+> |---|---|---|
+> | Rust's borrow checker enforces single-writer-or-multiple-readers on references at compile time | `[FACT]` | [rust-lang.org, Ownership chapter] |
+> | Certain memory-safety bug classes (use-after-free, data races on references) are unrepresentable in safe Rust; C++ requires runtime tools (ASan, TSan) or manual review to catch them | `[INFERENCE]` | Derived from the compile-time rule above |
+> | Comparative rates of exploitable memory-safety bugs in equivalent Rust vs C++ codebases | `[UNKNOWN]` | No controlled study I can cite. Closest public figure: Google Android Security 2022 report |
 >
-> [INFERENCE] Certain memory-safety bug classes (use-after-free, data races on references) are unrepresentable in safe Rust; C++ requires runtime tools (ASan, TSan) or manual review to catch them.
->
-> [UNKNOWN] Comparative rates of exploitable memory-safety bugs in equivalent Rust vs C++ codebases — no controlled study I can cite. Google Android and Microsoft internal data suggest large deltas in favor of Rust but is proprietary; check [Google Android Security 2022 report] for the closest public figure.
+> `[UNKNOWNS]`
+> - U1. Your workload (kernel, embedded, game engine, CLI) — changes which safety properties matter
+> - U2. Time horizon (current shipping code vs 5-year trajectory)
+
+---
+
+## The rule set at a glance
+
+The full spec is in `skills/ai-real-friend/SKILL.md`. Highlights:
+
+- **Label every substantive statement.** Core five: `[FACT]`, `[INFERENCE]`, `[SPECULATION]`, `[OPINION]`, `[UNKNOWN]`. Extended set adds `[DEFINITION]`, `[PREDICTION]`, `[TIME-BOUNDED, as of YYYY-MM-DD]`, `[JURISDICTION-DEPENDENT, region=X]`, `[QUOTE]`, `[ANECDOTE]`, `[CONSENSUS]`, `[MINORITY VIEW]`, `[DEPRECATED]`, `[SELF-REPORT]`, `[SIMULATION]`, `[ANALOGY]`.
+- **Cite inline** or mark `[UNVERIFIED CITATION]`. Never fabricate a source.
+- **Quantify uncertainty** with numbers or ranges — no bare "often", "usually", "many".
+- **Contested questions** get enumerated positions (P1, P2, …); no winner picked unless you ask.
+- **Ambiguous prompts** get a clarifying question first, not a silent guess.
+- **False premises** get corrected in line 1 before the task is executed.
+- **Positions and unknowns numbered continuously per session** — U1 in the first response, U4 in the next if the previous emitted U1–U3.
+- **Code blocks and error strings stay verbatim.** Labels apply to prose about code, not to the code itself.
+- **Format priority: table → bullet → prose.** Direct answer is a row or bullet, not a standalone sentence.
 
 ---
 
@@ -53,26 +91,15 @@ Requires Node.js 18+.
 
 ---
 
-## How it works
-
-Two Claude Code hooks + one skill + one statusline script.
-
-- **SessionStart hook** — reads config (env / repo / user / default), writes flag to `$CLAUDE_CONFIG_DIR/.friend-active`, and injects the full skill body into the session as hidden system context. Same session start, mode is already active — nothing for you to type.
-- **UserPromptSubmit hook** — watches every prompt for `friend on` / `friend off` / `/ai-real-friend` / natural-language triggers ("no bias", "just facts", "analyst mode"). Writes the flag. Emits a short per-turn reinforcement reminder so labeling doesn't drift after other plugins inject competing style instructions mid-conversation.
-- **Skill** (`skills/ai-real-friend/SKILL.md`) — the single source of truth for the mode's behavior: labeling rules, prohibited lexicon, answer shape, self-check.
-- **Statusline** — shows `[FRIEND]` in the Claude Code statusline whenever the mode is active.
-
----
-
 ## Turning it on/off
 
 | Phrase | Effect |
-|--------|--------|
+|---|---|
 | `friend on` / `/ai-real-friend` / `/friend` | activate |
-| `analyst mode` / `no bias` / `just facts` | activate (natural language) |
+| `analyst mode` / `no bias` / `just facts` / `be honest` | activate (natural language) |
 | `friend off` / `/ai-real-friend off` / `stop friend` / `disable friend` | deactivate |
 
-**`normal mode` is intentionally NOT a deactivation phrase** — other always-on modes (e.g. [caveman](https://github.com/JuliusBrussee/caveman)) claim that phrase for themselves, and ai-real-friend is designed to compose independently. If you want both off, say each off phrase.
+`normal mode` is intentionally NOT a deactivation phrase — other always-on modes (e.g. [caveman](https://github.com/JuliusBrussee/caveman)) claim that phrase for themselves, and ai-real-friend is designed to compose independently. To turn both off, say each off phrase.
 
 ---
 
@@ -94,6 +121,17 @@ Valid values: `"on"` | `"off"`.
 
 ---
 
+## How it works
+
+Two Claude Code hooks + one skill + one statusline script.
+
+- **SessionStart hook** — resolves the default (env → repo → user → `'on'`), writes the flag to `$CLAUDE_CONFIG_DIR/.friend-active`, and injects the full skill body into the session as hidden system context. Mode is already active by the first prompt — nothing for you to type.
+- **UserPromptSubmit hook** — watches every prompt for `friend on` / `friend off` / `/ai-real-friend` / natural-language triggers ("no bias", "just facts", "analyst mode", "be honest"). Writes the flag. Emits a short per-turn reinforcement reminder so labeling doesn't drift after other plugins inject competing style instructions mid-conversation.
+- **Skill** (`skills/ai-real-friend/SKILL.md`) — the single source of truth for the mode's behavior: labeling rules, prohibited lexicon, answer shape, self-check, code-handling policy.
+- **Statusline** — shows `[FRIEND]` in the Claude Code statusline whenever the mode is active.
+
+---
+
 ## What ships
 
 ```
@@ -106,11 +144,11 @@ ai-real-friend/
 │   ├── friend-statusline.sh     # [FRIEND] badge (bash)
 │   └── friend-statusline.ps1    # [FRIEND] badge (PowerShell)
 ├── bin/
-│   ├── install.js                # standalone installer (merges settings.json)
-│   └── lib/settings.js           # JSONC-tolerant reader/writer
+│   ├── install.js               # standalone installer (merges settings.json)
+│   └── lib/settings.js          # JSONC-tolerant reader/writer
 ├── commands/ai-real-friend-init.md   # /ai-real-friend-init slash command
-├── .claude-plugin/plugin.json    # Claude Code plugin manifest
-├── install.sh / install.ps1      # thin shims to bin/install.js
+├── .claude-plugin/plugin.json   # Claude Code plugin manifest
+├── install.sh / install.ps1     # thin shims to bin/install.js
 ├── package.json / LICENSE / README.md / CLAUDE.md
 ```
 
@@ -118,9 +156,11 @@ ai-real-friend/
 
 ## Known limits
 
-- Bias is not eliminable. Training data carry priors on which facts get surfaced, which sources counted authoritative, which framings default. This mode reduces surface tone and enforces labeling — not underlying selection bias.
-- For high-stakes questions (medical, legal, financial, safety-critical), cross-check against primary sources and adversarial sources.
-- Does not override safety refusals.
+- **A real friend can be wrong too.** This skill reduces sycophancy and enforces labeling; it does not fix underlying training-data selection bias. Which sources get surfaced, which framings default, which claims count as "settled" — all of those carry priors this mode cannot cancel.
+- **Retrieval-dependent.** Verify-before-assert only works if the runtime has tool access (WebFetch, file reads, MCP). In a tool-less context, `[UNVERIFIED CITATION]` becomes the dominant tag — this is the correct behavior, not a failure.
+- **Position-anchor is model-enforced.** A persistent user can still push the model into capitulating; the self-check is the only backstop.
+- **For high-stakes questions** (medical, legal, financial, safety-critical), cross-check against primary sources and adversarial sources. A friend can be honest and still wrong.
+- **Does not override safety refusals.** Harmful-request refusals still apply.
 
 ---
 

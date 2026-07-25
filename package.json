@@ -1,6 +1,6 @@
 {
   "name": "ai-real-friend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Real-friend response mode for Claude Code. Labels every substantive statement, cites sources inline, suppresses sycophancy.",
   "license": "MIT",
   "author": "hacknitive",
