@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" alt="ai-real-friend logo" width="160" height="160">
+</p>
+
 # ai-real-friend
 
 The friend who tells you the truth — even when you'd rather hear something else.

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" role="img" aria-label="ai-real-friend social preview">
+  <title>ai-real-friend</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="640" fill="url(#bg)"/>
+
+  <g transform="translate(80,120)">
+    <rect width="400" height="400" rx="72" ry="72" fill="#111827" stroke="#334155" stroke-width="3"/>
+    <g transform="translate(0,0) scale(0.390625)" >
+      <g fill="#f5f5f4">
+        <rect x="222" y="262" width="70" height="500"/>
+        <rect x="222" y="262" width="130" height="70"/>
+        <rect x="222" y="692" width="130" height="70"/>
+        <rect x="732" y="262" width="70" height="500"/>
+        <rect x="672" y="262" width="130" height="70"/>
+        <rect x="672" y="692" width="130" height="70"/>
+      </g>
+      <g fill="#f59e0b">
+        <rect x="412" y="262" width="70" height="500"/>
+        <rect x="412" y="262" width="240" height="70"/>
+        <rect x="412" y="482" width="190" height="60"/>
+      </g>
+      <circle cx="850" cy="850" r="42" fill="#22c55e"/>
+    </g>
+  </g>
+
+  <g transform="translate(540,240)" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+    <text x="0" y="0" font-size="82" font-weight="800" fill="#f5f5f4" letter-spacing="-2">ai-real-friend</text>
+    <text x="0" y="56" font-size="30" font-weight="500" fill="#94a3b8">Every claim labeled. No sycophancy.</text>
+  </g>
+
+  <g transform="translate(540,410)" font-family="ui-monospace, 'DejaVu Sans Mono', 'Liberation Mono', Menlo, Consolas, monospace" font-weight="700" font-size="22">
+    <g>
+      <rect x="0" y="0" width="112" height="42" rx="8" fill="#0b3d2e"/>
+      <text x="56" y="28" text-anchor="middle" fill="#22c55e">[FACT]</text>
+    </g>
+    <g transform="translate(124,0)">
+      <rect x="0" y="0" width="176" height="42" rx="8" fill="#3b2a08"/>
+      <text x="88" y="28" text-anchor="middle" fill="#f59e0b">[INFERENCE]</text>
+    </g>
+    <g transform="translate(312,0)">
+      <rect x="0" y="0" width="196" height="42" rx="8" fill="#3f1d1d"/>
+      <text x="98" y="28" text-anchor="middle" fill="#f87171">[SPECULATION]</text>
+    </g>
+    <g transform="translate(520,0)">
+      <rect x="0" y="0" width="140" height="42" rx="8" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+      <text x="70" y="28" text-anchor="middle" fill="#94a3b8">[UNKNOWN]</text>
+    </g>
+  </g>
+</svg>
